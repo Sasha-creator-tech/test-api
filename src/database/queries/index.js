@@ -3,9 +3,8 @@ module.exports = (sequelize, models) => {
         const movieCreation = await models.Movie.create({
             title: data.title,
             release_year: data.release_year,
-            format: data.format
+            format: data.format,
         });
-
         const actorNames = data.actors.map((el) => {
             const names = el.split(" ");
             return {
@@ -13,36 +12,43 @@ module.exports = (sequelize, models) => {
                 lastName: names[1]
             };
         });
-
         const actorCreationIfExist = [];
-        const actorMovieCreation = [];
-        //save actors and associate them with movies
         for (const name of actorNames) {
-            const actorInfo = await models.Actor.findOrCreate({
+            const foundActor = await models.Actor.findAll({
                 where: {
                     first_name: name.firstName,
                     last_name: name.lastName
                 }
             });
-            actorCreationIfExist.push(actorInfo);
+            if (!foundActor || !foundActor.length) {
+                const actorInfo = await models.Actor.create({
+                    first_name: name.firstName,
+                    last_name: name.lastName
+                });
 
-            actorMovieCreation.push(await models.ActorMovie.findOrCreate({
-                where: {
-                    movie_id: movieCreation.dataValues.id,
-                    actor_id: actorInfo[0].dataValues.id
-                }
-            }));
+                await actorInfo.addMovie(movieCreation);
+                actorCreationIfExist.push(actorInfo);
+            } else {
+                actorCreationIfExist.push(foundActor[0].dataValues.id);
+            }
         }
+
+        await movieCreation.addActor(actorCreationIfExist);
 
         return {
             ...movieCreation.dataValues,
             ...actorCreationIfExist,
-            ...actorCreationIfExist
         };
     }
 
     async function deleteMovie(data) {
-        // TODO: remove movie and actor if association doesn't exists
+        const deleteMovie = await models.Movie.destroy({
+           where: {
+               id: data.id
+           }
+        });
+
+        return deleteMovie;
     }
 
     return {

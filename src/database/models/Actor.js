@@ -15,7 +15,13 @@ module.exports = (sequelize) => {
         sequelize,
         modelName: "Actor",
         tableName: "actor",
-        timestamps: false
+        timestamps: false,
+        indexes: [
+            {
+                unique: true,
+                fields: ["first_name", "last_name"]
+            }
+        ]
     });
 
     return Actor;

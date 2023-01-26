@@ -21,7 +21,7 @@ router.post(
 );
 
 router.delete(
-    "/",
+    "/movie",
     body("id").isInt(),
     deleteMovie
 )
@@ -36,7 +36,6 @@ async function addMovie(req, res) {
 
     const data = req.body;
     try {
-        // TODO: say user if current row already exists
         const newMovieResult = await res.app.database.addMovie(data);
         return res.status(200).send(newMovieResult);
     } catch (error) {
@@ -55,7 +54,7 @@ async function deleteMovie(req, res) {
     const data = req.body;
     try {
         const removeMovieResult = await res.app.database.deleteMovie(data);
-        return res.status(200).send(removeMovieResult);
+        return res.sendStatus(200);
     } catch (error) {
         console.log(error);
         return res.status(500).send(resCodes["500"]);

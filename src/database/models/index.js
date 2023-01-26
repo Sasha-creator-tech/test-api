@@ -1,11 +1,12 @@
 module.exports = (sequelize) => {
   const Actor = require("./Actor")(sequelize);
   const Movie = require("./Movie")(sequelize);
-  const ActorMovie = require("./ActorMovie")(sequelize);
+
+  Actor.belongsToMany(Movie, { through: "Actor_Movie" });
+  Movie.belongsToMany(Actor, { through: "Actor_Movie" });
 
   return {
     Actor,
-    Movie,
-    ActorMovie
+    Movie
   }
 }
