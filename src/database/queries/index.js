@@ -52,14 +52,14 @@ module.exports = (sequelize, models) => {
     }
 
     async function getMovie(data) {
-        const movies = await models.Movie.findAll({
+        const movies = await models.Movie.findOne({
             where: {
                 title: data.title,
                 release_year: data.year
             },
             include: [{
                 model: models.Actor,
-                required: false,
+                required: true,
                 through: { attributes: [] }
             }]
         });
@@ -67,9 +67,41 @@ module.exports = (sequelize, models) => {
         return movies;
     }
 
+    async function getMovies(data) {
+
+        const where = {};
+        const actorWhere = {};
+        const order = [];
+        if (data.titleOrder) {
+            order.push(["title", data.titleOrder]);
+        }
+
+        if (data.title) {
+            where.title = data.title;
+        }
+
+        if (data.actor) {
+            actorWhere.first_name = data.actor;
+        }
+
+        const moviesQuery = {
+            where,
+            order,
+            include: [{
+                model: models.Actor,
+                required: true,
+                through: { attributes: [] },
+                where: actorWhere
+            }]
+        };
+
+        return await models.Movie.findAll(moviesQuery);
+    }
+
     return {
         addMovie,
         deleteMovie,
-        getMovie
-    }
+        getMovie,
+        getMovies
+    };
 }

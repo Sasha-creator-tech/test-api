@@ -33,6 +33,18 @@ router.get(
     getMovie
 );
 
+router.get(
+  "/movies",
+    query("titleOrder").optional().custom(function (value) {
+      if (["ASC", "DESC"].includes(value)) {
+          return true;
+      }
+    }),
+    query("title").optional().isString(),
+    query("actor").optional().isString(),
+    getMovies
+);
+
 //***FUNCTIONS***
 async function addMovie(req, res) {
     const validationErrors = validationResult(req);
@@ -77,6 +89,22 @@ async function getMovie(req, res) {
 
     try {
         const moviesResult = await res.app.database.getMovie(req.query);
+        return res.status(200).send(moviesResult);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send(resCodes["500"]);
+    }
+}
+
+async function getMovies(req, res) {
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+        res.status(400).send({ errors: validationErrors.array() });
+        return;
+    }
+
+    try {
+        const moviesResult = await res.app.database.getMovies(req.query);
         return res.status(200).send(moviesResult);
     } catch (error) {
         console.log(error);
