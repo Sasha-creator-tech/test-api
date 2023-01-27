@@ -3,6 +3,8 @@ const { header, body, query, validationResult } = require("express-validator");
 const router = express.Router();
 const config = require("../../config/config.json");
 const resCodes = require("../../config/resCodes.json");
+const multer = require("multer");
+const upload = multer({ storage: multer.memoryStorage() });
 
 //***ROUTES***
 //Add new movies
@@ -43,6 +45,12 @@ router.get(
     query("title").optional().isString(),
     query("actor").optional().isString(),
     getMovies
+);
+
+router.post(
+    "/importMovieFromFile",
+    upload.single("movies"),
+    importMoviesFile
 );
 
 //***FUNCTIONS***
@@ -106,6 +114,44 @@ async function getMovies(req, res) {
     try {
         const moviesResult = await res.app.database.getMovies(req.query);
         return res.status(200).send(moviesResult);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send(resCodes["500"]);
+    }
+}
+
+async function importMoviesFile(req, res) {
+    const file = req.file;
+    if (!file) {
+        const error = new Error("Please upload a file");
+        return res.status(400).send(error);
+    }
+
+    const multerText = Buffer.from(file.buffer).toString("utf-8");
+
+    try {
+        const rowsMovies = multerText.split("\n\n");
+        const filmsImportRes = [];
+        for (const row of rowsMovies) {
+            if (row == "") continue;
+            const movie = {};
+            const data = row.split("\n");
+            for (const property of data) {
+                if (property.split("Title: ")[1]) {
+                    movie.title = property.split("Title: ")[1];
+                } else if (property.split("Release Year: ")[1]) {
+                    movie.release_year = property.split("Release Year: ")[1];
+                } else if (property.split("Format: ")[1]) {
+                    movie.format = property.split("Format: ")[1];
+                } else if (property.split("Stars: ")[1]) {
+                    movie.actors = property.split("Stars: ")[1].split(", ");
+                }
+            }
+
+            filmsImportRes.push(await res.app.database.addMovie(movie));
+        }
+
+        res.status(200).send(filmsImportRes);
     } catch (error) {
         console.log(error);
         return res.status(500).send(resCodes["500"]);
