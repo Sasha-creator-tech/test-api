@@ -58,7 +58,7 @@ async function login(req, res) {
         if(password_valid){
             const token = jwt.sign({ "id": user.id, "email": user.email,"user_name": user.user_name }, process.env.SECRET);
             res.cookie("Bearer", token, { httpOnly: true, secure: true, maxAge: 3600000 });
-            res.status(400).send({ token });
+            res.status(200).send({ token });
         } else {
             res.status(400).send({ error : "Password Incorrect" });
         }
