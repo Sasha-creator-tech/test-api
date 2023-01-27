@@ -51,8 +51,25 @@ module.exports = (sequelize, models) => {
         return deleteMovie;
     }
 
+    async function getMovie(data) {
+        const movies = await models.Movie.findAll({
+            where: {
+                title: data.title,
+                release_year: data.year
+            },
+            include: [{
+                model: models.Actor,
+                required: false,
+                through: { attributes: [] }
+            }]
+        });
+
+        return movies;
+    }
+
     return {
         addMovie,
-        deleteMovie
+        deleteMovie,
+        getMovie
     }
 }
