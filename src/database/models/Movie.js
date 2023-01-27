@@ -16,7 +16,13 @@ module.exports = (sequelize) => {
         sequelize,
         modelName: "Movie",
         tableName: "movie",
-        timestamps: false
+        timestamps: false,
+        indexes: [
+            {
+                unique: true,
+                fields: ["title", "release_year", "format"]
+            }
+        ]
     });
 
     return Movie;

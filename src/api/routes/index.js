@@ -66,7 +66,9 @@ async function addMovie(req, res) {
         const newMovieResult = await res.app.database.addMovie(data);
         return res.status(200).send(newMovieResult);
     } catch (error) {
-        console.log(error);
+        if (error.original.code == "SQLITE_CONSTRAINT") {
+            return res.status(409).send(resCodes["409"]);
+        }
         return res.status(500).send(resCodes["500"]);
     }
 }
