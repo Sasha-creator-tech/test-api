@@ -1,10 +1,12 @@
 const express = require("express");
-const { header, body, query, validationResult } = require("express-validator");
+const { body, header, query, validationResult } = require("express-validator");
 const router = express.Router();
 const config = require("../../config/config.json");
 const resCodes = require("../../config/resCodes.json");
 const multer = require("multer");
 const upload = multer({ storage: multer.memoryStorage() });
+const user = require("./user");
+const auth = require("../middleware/index");
 
 //***ROUTES***
 //Add new movies
@@ -25,6 +27,7 @@ router.post(
 router.delete(
     "/movie",
     body("id").isInt(),
+    header("authorization").isString(),
     deleteMovie
 )
 
@@ -60,6 +63,7 @@ async function addMovie(req, res) {
         res.status(400).send({ errors: validationErrors.array() });
         return;
     }
+    if (!auth(req)) return res.status(401).send({ status: 401, message: "Couldn't Authenticate" });
 
     const data = req.body;
     try {
@@ -79,6 +83,7 @@ async function deleteMovie(req, res) {
         res.status(400).send({ errors: validationErrors.array() });
         return;
     }
+    if (!auth(req)) return res.status(401).send({ status: 401, message: "Couldn't Authenticate" });
 
     const data = req.body;
     try {
@@ -128,6 +133,7 @@ async function importMoviesFile(req, res) {
         const error = new Error("Please upload a file");
         return res.status(400).send(error);
     }
+    if (!auth(req)) return res.status(401).send({ status: 401, message: "Couldn't Authenticate" });
 
     const multerText = Buffer.from(file.buffer).toString("utf-8");
 
@@ -159,5 +165,7 @@ async function importMoviesFile(req, res) {
         return res.status(500).send(resCodes["500"]);
     }
 }
+
+router.use("/user", user);
 
 module.exports = router;

@@ -1,4 +1,6 @@
-module.exports = (sequelize, models) => {
+module.exports = (models) => {
+    const user = require("./user")(models);
+
     async function addMovie(data) {
         const movieCreation = await models.Movie.create({
             title: data.title,
@@ -102,6 +104,8 @@ module.exports = (sequelize, models) => {
         addMovie,
         deleteMovie,
         getMovie,
-        getMovies
+        getMovies,
+
+        ...user
     };
 }

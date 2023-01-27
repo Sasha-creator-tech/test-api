@@ -8,6 +8,6 @@ const sequelize = new Sequelize("movie-db", "user", "pass", {
 sequelize.sync().then(() => console.log(`database is synchronised...`));
 
 const models = require("./models")(sequelize);
-const queries = require("./queries")(sequelize, models);
+const queries = require("./queries")(models);
 
 module.exports = queries;
