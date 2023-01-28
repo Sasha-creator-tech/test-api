@@ -15,6 +15,6 @@ app.use(cookieParser());
 app.use("/", routes);
 
 // TODO: change PORT to env var
-app.listen(3000, () => {
-    console.log(`Served started.\nPort: ${3000}`);
+app.listen(process.env.API_PORT, () => {
+    console.log(`Served started.\nPort: ${process.env.API_PORT}`);
 });
