@@ -10,3 +10,5 @@ created api using Express.js, Sequelize and SQLite for database.
 
 - In order to implement main logic i decided to use many-to-many relationships between two tables (Movie and Actor).
 - For Authorisations and Authentication used JWT tokens
+
+- You can import ```https://github.com/Sasha-creator-tech/test-api/blob/main/sample_movies%20(1).txt``` file to fill in the database 
